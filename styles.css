@@ -933,6 +933,31 @@ body[data-aura="good"] .rebirth-panel {
   display: none !important;
 }
 
+/* 鎖定選題流：靈魂表 › 道圖 › 最新題 › 選項 › 上一題 */
+.play > .soul-bar {
+  order: 0;
+}
+
+.play > .realm-art {
+  order: 1;
+}
+
+.play > .fate-log {
+  order: 2;
+}
+
+.play > .choice-dock {
+  order: 3;
+}
+
+.play > .fate-past {
+  order: 4;
+}
+
+.play > .resume-layer {
+  order: 5;
+}
+
 .soul-bar {
   position: sticky;
   top: 0;
@@ -1046,15 +1071,18 @@ body[data-aura="good"] .rebirth-panel {
 
 .hud-stats__row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: 4.8em minmax(0, 1fr) 5.2em;
   gap: 8px 10px;
   align-items: center;
   min-height: 24px;
 }
 
 .hud-stats__lead {
+  width: 100%;
   min-width: 0;
-  max-width: 4.8em;
+  max-width: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .hud-stats__realm {
@@ -1065,17 +1093,21 @@ body[data-aura="good"] .rebirth-panel {
 }
 
 .hud-stats__meters {
-  display: flex;
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   align-items: center;
-  justify-content: stretch;
   min-width: 0;
   width: 100%;
 }
 
 .hud-stats__trail {
-  justify-self: end;
+  width: 100%;
+  justify-self: stretch;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-width: 0;
 }
 
 .hud-stat {
@@ -1086,11 +1118,27 @@ body[data-aura="good"] .rebirth-panel {
   grid-template-columns: 1.2em minmax(0, 1fr) 2em;
   column-gap: 6px;
   align-items: center;
-  flex: 1 1 0;
   width: auto;
   min-width: 0;
   font-size: 11px;
   letter-spacing: 0.08em;
+}
+
+/* 上列福／慧／定(靈) 與下列貪／嗔／痴 同欄對齊 */
+.hud-stat[data-stat="merit"],
+.hud-stat[data-stat="greed"] {
+  grid-column: 1;
+}
+
+.hud-stat[data-stat="wisdom"],
+.hud-stat[data-stat="anger"] {
+  grid-column: 2;
+}
+
+.hud-stat[data-stat="composure"],
+.hud-stat[data-stat="spirit"],
+.hud-stat[data-stat="ignorance"] {
+  grid-column: 3;
 }
 
 .hud-stat[data-stat="merit"] {
@@ -1354,17 +1402,21 @@ body[data-aura="good"] .rebirth-panel {
 .log-line--past {
   width: 100%;
   max-width: none;
-  padding: 10px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.02);
-  opacity: 0.55;
+  margin-top: 0;
+  padding: 14px 16px;
+  border: 1px solid rgba(228, 201, 138, 0.14);
+  border-radius: 18px;
+  background:
+    radial-gradient(520px 180px at 0% 0%, rgba(228, 201, 138, 0.05), transparent 60%),
+    linear-gradient(165deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  opacity: 0.72;
 }
 
 .log-line--past .log-line__text {
-  color: rgba(232, 234, 239, 0.78);
-  font-size: 14px;
-  line-height: 1.55;
+  color: rgba(232, 234, 239, 0.82);
+  font-size: 15px;
+  line-height: 1.6;
 }
 
 .log-line--past .log-line__delta {
@@ -1428,10 +1480,22 @@ body[data-aura="good"] .rebirth-panel {
   flex: none;
   display: grid;
   gap: 10px;
-  padding: 14px max(22px, calc((100% - 760px) / 2)) 24px;
+  padding: 14px max(22px, calc((100% - 760px) / 2)) 8px;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
   background: transparent;
+}
+
+.fate-past {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px max(22px, calc((100% - 760px) / 2)) 24px;
+}
+
+.fate-past:empty {
+  display: none;
 }
 
 .resume-layer {
@@ -1588,7 +1652,7 @@ body[data-aura="good"] .rebirth-panel {
   overflow: hidden;
   scrollbar-width: none;
   border-radius: 22px;
-  padding: 16px 14px 24px;
+  padding: 12px 12px 18px;
   box-shadow: none;
 }
 
@@ -1598,53 +1662,77 @@ body[data-aura="good"] .rebirth-panel {
   height: 0;
 }
 
-.ending-flip__face--back .diagnostic-card::before {
+.ending-flip__face--back .diagnostic-card::before,
+.ending-flip__face--back .diagnostic-card::after {
   display: none;
 }
 
+.ending-flip__face--back .diagnostic-card__corners {
+  font-size: 12px;
+}
+
 .ending-flip__face--back .diagnostic-card__title {
-  margin: 4px 0 2px;
-  padding-bottom: 8px;
-  font-size: 28px;
-  letter-spacing: 0.14em;
+  margin: 0 0 2px;
+  padding-bottom: 4px;
+  font-size: 15px;
+  letter-spacing: 0.1em;
 }
 
 .ending-flip__face--back .diagnostic-card__subtitle {
-  margin: 0 0 6px;
-  font-size: 15px;
+  margin: 0 0 3px;
+  font-size: 10px;
 }
 
 .ending-flip__face--back .diagnostic-card__cycle {
-  margin: 0 4px 10px;
-  font-size: 14px;
+  margin: 0 2px 6px;
+  font-size: 11px;
+  line-height: 1.4;
 }
 
 .ending-flip__face--back .diagnostic-card__fields {
   flex: 0 0 auto;
-  margin-bottom: 4px;
+  margin-bottom: 0;
 }
 
 .ending-flip__face--back .diagnostic-card__field {
-  margin-bottom: 10px;
-  font-size: 18px;
+  margin-bottom: 5px;
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+.ending-flip__face--back .diagnostic-card__label {
+  font-size: 10.5px;
+}
+
+.ending-flip__face--back .diagnostic-card__value {
+  font-size: 11.5px;
+  line-height: 1.4;
 }
 
 .ending-flip__face--back .diagnostic-card__chart {
   flex: 1 1 auto;
-  margin-top: 4px;
-  padding-bottom: 4px;
+  margin-top: 2px;
+  padding-bottom: 2px;
   min-height: 0;
 }
 
 .ending-flip__face--back .diagnostic-card__ring {
-  width: min(100%, 230px);
+  width: min(100%, 160px);
+}
+
+.ending-flip__face--back .diagnostic-card__ring .fate-ring__label {
+  font-size: 10.5px;
+}
+
+.ending-flip__face--back .diagnostic-card__ring .fate-ring__extra {
+  font-size: 9.5px;
 }
 
 .ending-flip__face--back .diagnostic-card__stamp {
-  right: 14px;
-  bottom: 18px;
-  max-width: 46%;
-  font-size: 13px;
+  right: 10px;
+  bottom: 12px;
+  max-width: 40%;
+  font-size: 10px;
 }
 
 .ending-flip__hint {
@@ -1700,7 +1788,7 @@ body[data-aura="good"] .rebirth-panel {
   background: transparent;
   color: #000000;
   font-family: "Noto Serif TC", "Noto Serif CJK TC", serif;
-  font-size: 6.4cqw;
+  font-size: 5.2cqw;
   font-weight: 700;
   letter-spacing: 0.06em;
   line-height: 1;
@@ -1920,7 +2008,7 @@ body[data-aura="good"] .rebirth-panel {
   text-orientation: upright;
   color: #000000;
   font-family: "Noto Serif TC", "Noto Serif CJK TC", serif;
-  font-size: 8.4cqw;
+  font-size: 6.8cqw;
   font-weight: 700;
   letter-spacing: 0.12em;
   line-height: 1;
@@ -1957,9 +2045,9 @@ body[data-aura="good"] .rebirth-panel {
   white-space: pre-line;
   color: #3c291c;
   font-family: "Noto Serif TC", "Noto Serif CJK TC", serif;
-  font-size: 4.0cqw;
+  font-size: 3.2cqw;
   font-weight: 500;
-  line-height: 1.5;
+  line-height: 1.45;
   letter-spacing: 0.04em;
 }
 
@@ -2589,11 +2677,8 @@ body[data-aura="good"] .rebirth-panel {
   }
 
   .hud-stats__row {
+    grid-template-columns: 3.8em minmax(0, 1fr) 4.6em;
     gap: 6px 8px;
-  }
-
-  .hud-stats__lead {
-    max-width: 3.6em;
   }
 
   .soul-bar {

@@ -3697,6 +3697,7 @@ function boot() {
   const hudSpirit = document.getElementById("hud-spirit");
   const hudComposure = document.getElementById("hud-composure");
   const fateLog = document.getElementById("fate-log");
+  const fatePast = document.getElementById("fate-past");
   const choiceDock = document.getElementById("choice-dock");
   const realmArt = document.getElementById("realm-art");
   const realmArtImg = document.getElementById("realm-art-img");
@@ -4292,59 +4293,65 @@ function boot() {
     realmArtTimer = window.setTimeout(reveal, FADE_MS);
   }
 
+  function moveLinesToPast(lines) {
+    if (!fatePast || !lines.length) {
+      return;
+    }
+    fatePast.replaceChildren();
+    lines.forEach(function move(line) {
+      line.classList.remove("is-new");
+      line.classList.remove("log-line--prompt");
+      line.classList.add("log-line--past");
+      line.removeAttribute("data-age");
+      fatePast.appendChild(line);
+    });
+  }
+
   function fadeHistory() {
     const lines = Array.prototype.slice.call(fateLog.querySelectorAll(".log-line"));
     const questions = lines.filter(function isQuestion(line) {
       return !!line.querySelector(".log-line__text");
     });
     const current = questions[questions.length - 1];
-    const previous = questions.length > 1 ? questions[questions.length - 2] : null;
-    const keepFrom = previous || current;
-    if (keepFrom) {
-      lines.forEach(function drop(line) {
-        if (keepFrom.compareDocumentPosition(line) & Node.DOCUMENT_POSITION_PRECEDING) {
-          line.remove();
-        }
+    if (current) {
+      const older = lines.filter(function isOlder(line) {
+        return !!(current.compareDocumentPosition(line) & Node.DOCUMENT_POSITION_PRECEDING);
       });
+      // 新題出現時，才把上一題（含數值）移到選項下方，避免底框先消失
+      moveLinesToPast(older);
     }
     const left = Array.prototype.slice.call(fateLog.querySelectorAll(".log-line"));
     left.forEach(function reset(line) {
       line.classList.remove("is-new");
-      line.classList.remove("log-line--prompt");
       line.classList.remove("log-line--past");
       line.removeAttribute("data-age");
+      if (!line.classList.contains("log-line--prompt")) {
+        line.classList.add("log-line--prompt");
+      }
     });
-    const leftQuestions = left.filter(function isQuestion(line) {
+    const shown = left.filter(function isQuestion(line) {
       return !!line.querySelector(".log-line__text");
-    });
-    const shown = leftQuestions[leftQuestions.length - 1];
-    const earlier = leftQuestions.length > 1 ? leftQuestions[leftQuestions.length - 2] : null;
+    })[0];
     if (shown) {
-      shown.classList.add("log-line--prompt", "is-new");
+      shown.classList.add("is-new");
     }
-    if (earlier) {
-      earlier.classList.add("log-line--past");
-    }
-    left.forEach(function fadeDelta(line) {
-      if (!shown || !line.classList.contains("log-line--delta")) {
-        return;
-      }
-      if (shown.compareDocumentPosition(line) & Node.DOCUMENT_POSITION_PRECEDING) {
-        line.classList.add("log-line--past");
-      }
-    });
   }
 
   function pushDelta(text) {
-    const article = document.createElement("article");
-    article.className = "log-line log-line--delta is-new";
     const line = document.createElement("p");
     line.className = "log-line__delta";
     line.textContent = text;
-    article.appendChild(line);
-    fateLog.appendChild(article);
+    // 數值寫進同一題底框內，選擇後底框不拆掉
+    const host = fateLog.querySelector(".log-line--prompt") || fateLog.querySelector(".log-line");
+    if (host) {
+      host.appendChild(line);
+    } else {
+      const article = document.createElement("article");
+      article.className = "log-line log-line--prompt log-line--delta";
+      article.appendChild(line);
+      fateLog.appendChild(article);
+    }
     game.world.log.push(text);
-    fadeHistory();
   }
 
   function resolvePromptText(text) {
@@ -4936,7 +4943,7 @@ function boot() {
       const px = w / Math.max(1, shownW);
       const title = endingPlateName.textContent || "";
       if (title) {
-        const fontPx = w * 0.064;
+        const fontPx = w * 0.052;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.font = "700 " + fontPx + 'px "Noto Serif TC", "Noto Serif CJK TC", serif';
@@ -4948,7 +4955,7 @@ function boot() {
       }
       const realmName = endingPlateRealm && endingPlateRealm.textContent ? endingPlateRealm.textContent.trim() : "";
       if (realmName) {
-        const fontPx = w * 0.084;
+        const fontPx = w * 0.068;
         const chars = Array.from(realmName);
         const lineH = fontPx * 1.12;
         let y = h * 0.122;
@@ -4968,14 +4975,14 @@ function boot() {
       }
       const body = endingPlateText.textContent || "";
       if (body) {
-        const fontPx = w * 0.04;
+        const fontPx = w * 0.032;
         const maxWidth = w * 0.8;
         ctx.fillStyle = "#3c291c";
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
         ctx.font = "500 " + fontPx + 'px "Noto Serif TC", "Noto Serif CJK TC", serif';
         const lines = wrapShareLines(ctx, body, maxWidth);
-        const lineH = fontPx * 1.5;
+        const lineH = fontPx * 1.45;
         const top = h * 0.785;
         const bottom = h * 0.946;
         const blockH = lines.length * lineH;
@@ -5006,7 +5013,7 @@ function boot() {
     const px = w / Math.max(1, endingPlateArt.getBoundingClientRect().width || endingPlate.clientWidth || w);
     const title = endingPlateName.textContent || "";
     if (title) {
-      const fontPx = w * 0.064;
+      const fontPx = w * 0.052;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.font = "700 " + fontPx + 'px "Noto Serif TC", "Noto Serif CJK TC", serif';
@@ -5018,7 +5025,7 @@ function boot() {
     }
     const realmName = endingPlateRealm && endingPlateRealm.textContent ? endingPlateRealm.textContent.trim() : "";
     if (realmName) {
-      const fontPx = w * 0.084;
+      const fontPx = w * 0.068;
       const chars = Array.from(realmName);
       const lineH = fontPx * 1.12;
       let ty = y + h * 0.122;
@@ -5038,14 +5045,14 @@ function boot() {
     }
     const body = endingPlateText.textContent || "";
     if (body) {
-      const fontPx = w * 0.04;
+      const fontPx = w * 0.032;
       const maxWidth = w * 0.8;
       ctx.fillStyle = "#3c291c";
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
       ctx.font = "500 " + fontPx + 'px "Noto Serif TC", "Noto Serif CJK TC", serif';
       const lines = wrapShareLines(ctx, body, maxWidth);
-      const lineH = fontPx * 1.5;
+      const lineH = fontPx * 1.45;
       const top = y + h * 0.785;
       const bottom = y + h * 0.946;
       const blockH = lines.length * lineH;
@@ -5125,22 +5132,22 @@ function boot() {
       const boxY = pad;
       const boxW = rightW;
       const boxH = leftH;
-      const ringW = 188;
+      const ringW = 160;
       const ringH = Math.round(ringW * (236 / 300));
-      const stampW = 144;
-      const stampH = 52;
-      const fieldSlots = [0, 52, 104, 168];
+      const stampW = 120;
+      const stampH = 44;
+      const fieldSlots = [0, 42, 84, 136];
       const fieldMaxLines = [1, 1, 2, 2];
-      const labelW = 92;
-      const valueWidth = boxW - 48 - labelW;
-      const lineH = 20;
-      const stackPadTop = 20;
-      const stackPadBottom = 18;
-      const fieldsBlockH = fieldSlots[fieldSlots.length - 1] + lineH * 2 + 8;
-      const headerH = 108;
-      const gapBeforeRing = 14;
+      const labelW = 84;
+      const valueWidth = boxW - 40 - labelW;
+      const lineH = 17;
+      const stackPadTop = 14;
+      const stackPadBottom = 14;
+      const fieldsBlockH = fieldSlots[fieldSlots.length - 1] + lineH * 2 + 6;
+      const headerH = 88;
+      const gapBeforeRing = 10;
       const stackH = stackPadTop + headerH + fieldsBlockH + gapBeforeRing + ringH + stackPadBottom;
-      const stackTop = boxY + Math.max(16, Math.round((boxH - stackH) / 2));
+      const stackTop = boxY + Math.max(12, Math.round((boxH - stackH) / 2));
 
       ctx.fillStyle = "#f2e6ce";
       ctx.fillRect(boxX, boxY, boxW, boxH);
@@ -5151,44 +5158,44 @@ function boot() {
       ctx.lineWidth = 2;
       ctx.strokeRect(boxX + 12, boxY + 12, boxW - 24, boxH - 24);
       ctx.fillStyle = "#3a2e2b";
-      ctx.font = "20px serif";
+      ctx.font = "14px serif";
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
-      ctx.fillText("☠", boxX + 18, boxY + 16);
-      ctx.fillText("☠", boxX + boxW - 36, boxY + 16);
-      ctx.fillText("☣", boxX + 18, boxY + boxH - 30);
-      ctx.fillText("☠", boxX + boxW - 36, boxY + boxH - 30);
+      ctx.fillText("☠", boxX + 14, boxY + 12);
+      ctx.fillText("☠", boxX + boxW - 28, boxY + 12);
+      ctx.fillText("☣", boxX + 14, boxY + boxH - 24);
+      ctx.fillText("☠", boxX + boxW - 28, boxY + boxH - 24);
 
       const titleY = stackTop + stackPadTop;
-      const ruleY = titleY + 30;
-      const disclaimerY = ruleY + 10;
-      const cycleY = disclaimerY + 22;
+      const ruleY = titleY + 22;
+      const disclaimerY = ruleY + 8;
+      const cycleY = disclaimerY + 18;
       const fieldsY = stackTop + stackPadTop + headerH;
       const ringX = boxX + Math.max(0, (boxW - ringW) / 2);
       const ringY = fieldsY + fieldsBlockH + gapBeforeRing;
-      const stampCX = boxX + boxW - 18 - stampW / 2;
+      const stampCX = boxX + boxW - 14 - stampW / 2;
       const stampCY = ringY + ringH - stampH / 2 - 4;
 
       ctx.textAlign = "center";
       ctx.fillStyle = "#2b1f1d";
-      ctx.font = '700 24px "Noto Serif TC", "Noto Serif CJK TC", serif';
+      ctx.font = '700 17px "Noto Serif TC", "Noto Serif CJK TC", serif';
       ctx.fillText("業力診斷書", boxX + boxW / 2, titleY);
       ctx.strokeStyle = "#3a2e2b";
       ctx.setLineDash([5, 4]);
       ctx.beginPath();
-      ctx.moveTo(boxX + 28, ruleY);
-      ctx.lineTo(boxX + boxW - 28, ruleY);
+      ctx.moveTo(boxX + 24, ruleY);
+      ctx.lineTo(boxX + boxW - 24, ruleY);
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.fillStyle = "#5c1d1d";
-      ctx.font = 'italic 13px "Courier New", monospace';
+      ctx.font = 'italic 11px "Courier New", monospace';
       ctx.fillText("※ 業力不退費 · 下世概不認帳 ※", boxX + boxW / 2, disclaimerY);
 
       if (menpoCycleText) {
         ctx.fillStyle = "#5c1d1d";
-        ctx.font = '700 14px "Courier New", monospace';
-        wrapShareLines(ctx, menpoCycleText, boxW - 48).slice(0, 2).forEach(function paint(line, index) {
-          ctx.fillText(line, boxX + boxW / 2, cycleY + index * 18);
+        ctx.font = '700 12px "Courier New", monospace';
+        wrapShareLines(ctx, menpoCycleText, boxW - 40).slice(0, 2).forEach(function paint(line, index) {
+          ctx.fillText(line, boxX + boxW / 2, cycleY + index * 15);
         });
       }
 
@@ -5200,7 +5207,7 @@ function boot() {
       ];
       fieldRows.forEach(function paint(row, index) {
         const ty = fieldsY + fieldSlots[index];
-        ctx.font = 'italic 15px "Noto Serif TC", Georgia, serif';
+        ctx.font = 'italic 12px "Noto Serif TC", Georgia, serif';
         let lines = wrapShareLines(ctx, row.value || "—", valueWidth);
         const maxLines = fieldMaxLines[index];
         if (lines.length > maxLines) {
@@ -5210,20 +5217,20 @@ function boot() {
         }
         ctx.textAlign = "left";
         ctx.fillStyle = "#332522";
-        ctx.font = '700 15px "Courier New", monospace';
-        ctx.fillText(row.label, boxX + 24, ty);
-        ctx.font = 'italic 15px "Noto Serif TC", Georgia, serif';
+        ctx.font = '700 12px "Courier New", monospace';
+        ctx.fillText(row.label, boxX + 20, ty);
+        ctx.font = 'italic 12px "Noto Serif TC", Georgia, serif';
         ctx.fillStyle = "#174229";
         lines.forEach(function paintLine(line, lineIndex) {
-          const lx = boxX + 24 + labelW;
+          const lx = boxX + 20 + labelW;
           const ly = ty + lineIndex * lineH;
           ctx.fillText(line, lx, ly);
           ctx.strokeStyle = "#1a1210";
           ctx.lineWidth = 1;
           ctx.setLineDash([3, 3]);
           ctx.beginPath();
-          ctx.moveTo(lx, ly + 16);
-          ctx.lineTo(boxX + boxW - 24, ly + 16);
+          ctx.moveTo(lx, ly + 13);
+          ctx.lineTo(boxX + boxW - 20, ly + 13);
           ctx.stroke();
           ctx.setLineDash([]);
         });
@@ -5239,18 +5246,18 @@ function boot() {
         ctx.translate(stampCX, stampCY);
         ctx.rotate(-12 * Math.PI / 180);
         ctx.strokeStyle = "#9c2424";
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2;
         roundShareRect(ctx, -stampW / 2, -stampH / 2, stampW, stampH, 4);
         ctx.stroke();
         ctx.fillStyle = "rgba(242, 230, 206, 0.88)";
         ctx.fill();
         ctx.fillStyle = "#9c2424";
-        ctx.font = '700 13px "Courier New", monospace';
+        ctx.font = '700 11px "Courier New", monospace';
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        const stampLines = wrapShareLines(ctx, stampText, stampW - 16).slice(0, 2);
+        const stampLines = wrapShareLines(ctx, stampText, stampW - 14).slice(0, 2);
         stampLines.forEach(function paint(line, index) {
-          ctx.fillText(line, 0, (index - (stampLines.length - 1) / 2) * 16);
+          ctx.fillText(line, 0, (index - (stampLines.length - 1) / 2) * 13);
         });
         ctx.restore();
       }
@@ -5370,22 +5377,22 @@ function boot() {
       const boxW = cardW;
       const boxH = cardH;
       const scale = cardW / 420;
-      const ringW = Math.round(230 * scale);
+      const ringW = Math.round(190 * scale);
       const ringH = Math.round(ringW * (236 / 300));
-      const stampW = Math.round(144 * scale);
-      const stampH = Math.round(52 * scale);
-      const fieldSlots = [0, 52, 104, 168].map(function map(v) {
+      const stampW = Math.round(120 * scale);
+      const stampH = Math.round(44 * scale);
+      const fieldSlots = [0, 42, 84, 136].map(function map(v) {
         return Math.round(v * scale);
       });
       const fieldMaxLines = [1, 1, 2, 2];
-      const labelW = Math.round(92 * scale);
+      const labelW = Math.round(84 * scale);
       const valueWidth = boxW - Math.round(48 * scale) - labelW;
-      const lineH = Math.round(20 * scale);
-      const stackPadTop = Math.round(20 * scale);
-      const stackPadBottom = Math.round(18 * scale);
-      const fieldsBlockH = fieldSlots[fieldSlots.length - 1] + lineH * 2 + Math.round(8 * scale);
-      const headerH = Math.round(108 * scale);
-      const gapBeforeRing = Math.round(14 * scale);
+      const lineH = Math.round(17 * scale);
+      const stackPadTop = Math.round(14 * scale);
+      const stackPadBottom = Math.round(14 * scale);
+      const fieldsBlockH = fieldSlots[fieldSlots.length - 1] + lineH * 2 + Math.round(6 * scale);
+      const headerH = Math.round(88 * scale);
+      const gapBeforeRing = Math.round(10 * scale);
       const stackH = stackPadTop + headerH + fieldsBlockH + gapBeforeRing + ringH + stackPadBottom;
       const stackTop = boxY + Math.max(Math.round(16 * scale), Math.round((boxH - stackH) / 2));
 
@@ -5406,44 +5413,44 @@ function boot() {
       }
 
       ctx.fillStyle = "#3a2e2b";
-      ctx.font = Math.round(18 * scale) + "px serif";
+      ctx.font = Math.round(14 * scale) + "px serif";
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
-      ctx.fillText("☠", boxX + Math.round(18 * scale), boxY + Math.round(16 * scale));
-      ctx.fillText("☠", boxX + boxW - Math.round(36 * scale), boxY + Math.round(16 * scale));
-      ctx.fillText("☣", boxX + Math.round(18 * scale), boxY + boxH - Math.round(30 * scale));
-      ctx.fillText("☠", boxX + boxW - Math.round(36 * scale), boxY + boxH - Math.round(30 * scale));
+      ctx.fillText("☠", boxX + Math.round(14 * scale), boxY + Math.round(12 * scale));
+      ctx.fillText("☠", boxX + boxW - Math.round(28 * scale), boxY + Math.round(12 * scale));
+      ctx.fillText("☣", boxX + Math.round(14 * scale), boxY + boxH - Math.round(24 * scale));
+      ctx.fillText("☠", boxX + boxW - Math.round(28 * scale), boxY + boxH - Math.round(24 * scale));
 
       const titleY = stackTop + stackPadTop;
-      const ruleY = titleY + Math.round(30 * scale);
-      const disclaimerY = ruleY + Math.round(10 * scale);
-      const cycleY = disclaimerY + Math.round(22 * scale);
+      const ruleY = titleY + Math.round(22 * scale);
+      const disclaimerY = ruleY + Math.round(8 * scale);
+      const cycleY = disclaimerY + Math.round(18 * scale);
       const fieldsY = stackTop + stackPadTop + headerH;
       const ringX = boxX + Math.max(0, (boxW - ringW) / 2);
       const ringY = fieldsY + fieldsBlockH + gapBeforeRing;
-      const stampCX = boxX + boxW - Math.round(18 * scale) - stampW / 2;
+      const stampCX = boxX + boxW - Math.round(14 * scale) - stampW / 2;
       const stampCY = ringY + ringH - stampH / 2 - Math.round(4 * scale);
 
       ctx.textAlign = "center";
       ctx.fillStyle = "#2b1f1d";
-      ctx.font = "700 " + Math.round(24 * scale) + 'px "Noto Serif TC", "Noto Serif CJK TC", serif';
+      ctx.font = "700 " + Math.round(17 * scale) + 'px "Noto Serif TC", "Noto Serif CJK TC", serif';
       ctx.fillText("業力診斷書", boxX + boxW / 2, titleY);
       ctx.strokeStyle = "#3a2e2b";
       ctx.setLineDash([5, 4]);
       ctx.beginPath();
-      ctx.moveTo(boxX + Math.round(28 * scale), ruleY);
-      ctx.lineTo(boxX + boxW - Math.round(28 * scale), ruleY);
+      ctx.moveTo(boxX + Math.round(24 * scale), ruleY);
+      ctx.lineTo(boxX + boxW - Math.round(24 * scale), ruleY);
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.fillStyle = "#5c1d1d";
-      ctx.font = "italic " + Math.round(13 * scale) + 'px "Courier New", monospace';
+      ctx.font = "italic " + Math.round(11 * scale) + 'px "Courier New", monospace';
       ctx.fillText("※ 業力不退費 · 下世概不認帳 ※", boxX + boxW / 2, disclaimerY);
 
       if (menpoCycleText) {
         ctx.fillStyle = "#5c1d1d";
-        ctx.font = "700 " + Math.round(14 * scale) + 'px "Courier New", monospace';
-        wrapShareLines(ctx, menpoCycleText, boxW - Math.round(48 * scale)).slice(0, 2).forEach(function paint(line, index) {
-          ctx.fillText(line, boxX + boxW / 2, cycleY + index * Math.round(18 * scale));
+        ctx.font = "700 " + Math.round(12 * scale) + 'px "Courier New", monospace';
+        wrapShareLines(ctx, menpoCycleText, boxW - Math.round(40 * scale)).slice(0, 2).forEach(function paint(line, index) {
+          ctx.fillText(line, boxX + boxW / 2, cycleY + index * Math.round(15 * scale));
         });
       }
 
@@ -5455,7 +5462,7 @@ function boot() {
       ];
       fieldRows.forEach(function paint(row, index) {
         const ty = fieldsY + fieldSlots[index];
-        ctx.font = "italic " + Math.round(15 * scale) + 'px "Noto Serif TC", Georgia, serif';
+        ctx.font = "italic " + Math.round(12 * scale) + 'px "Noto Serif TC", Georgia, serif';
         let lines = wrapShareLines(ctx, row.value || "—", valueWidth);
         const maxLines = fieldMaxLines[index];
         if (lines.length > maxLines) {
@@ -5465,20 +5472,20 @@ function boot() {
         }
         ctx.textAlign = "left";
         ctx.fillStyle = "#332522";
-        ctx.font = "700 " + Math.round(15 * scale) + 'px "Courier New", monospace';
-        ctx.fillText(row.label, boxX + Math.round(24 * scale), ty);
-        ctx.font = "italic " + Math.round(15 * scale) + 'px "Noto Serif TC", Georgia, serif';
+        ctx.font = "700 " + Math.round(12 * scale) + 'px "Courier New", monospace';
+        ctx.fillText(row.label, boxX + Math.round(20 * scale), ty);
+        ctx.font = "italic " + Math.round(12 * scale) + 'px "Noto Serif TC", Georgia, serif';
         ctx.fillStyle = "#174229";
         lines.forEach(function paintLine(line, lineIndex) {
-          const lx = boxX + Math.round(24 * scale) + labelW;
+          const lx = boxX + Math.round(20 * scale) + labelW;
           const ly = ty + lineIndex * lineH;
           ctx.fillText(line, lx, ly);
           ctx.strokeStyle = "#1a1210";
           ctx.lineWidth = 1;
           ctx.setLineDash([3, 3]);
           ctx.beginPath();
-          ctx.moveTo(lx, ly + Math.round(16 * scale));
-          ctx.lineTo(boxX + boxW - Math.round(24 * scale), ly + Math.round(16 * scale));
+          ctx.moveTo(lx, ly + Math.round(13 * scale));
+          ctx.lineTo(boxX + boxW - Math.round(20 * scale), ly + Math.round(13 * scale));
           ctx.stroke();
           ctx.setLineDash([]);
         });
@@ -5494,18 +5501,18 @@ function boot() {
         ctx.translate(stampCX, stampCY);
         ctx.rotate(-12 * Math.PI / 180);
         ctx.strokeStyle = "#9c2424";
-        ctx.lineWidth = Math.max(2, Math.round(3 * scale));
+        ctx.lineWidth = Math.max(2, Math.round(2 * scale));
         roundShareRect(ctx, -stampW / 2, -stampH / 2, stampW, stampH, 4);
         ctx.stroke();
         ctx.fillStyle = "rgba(242, 230, 206, 0.88)";
         ctx.fill();
         ctx.fillStyle = "#9c2424";
-        ctx.font = "700 " + Math.round(13 * scale) + 'px "Courier New", monospace';
+        ctx.font = "700 " + Math.round(11 * scale) + 'px "Courier New", monospace';
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        const stampLines = wrapShareLines(ctx, stampText, stampW - Math.round(16 * scale)).slice(0, 2);
+        const stampLines = wrapShareLines(ctx, stampText, stampW - Math.round(14 * scale)).slice(0, 2);
         stampLines.forEach(function paint(line, index) {
-          ctx.fillText(line, 0, (index - (stampLines.length - 1) / 2) * Math.round(16 * scale));
+          ctx.fillText(line, 0, (index - (stampLines.length - 1) / 2) * Math.round(13 * scale));
         });
         ctx.restore();
       }
@@ -5717,6 +5724,9 @@ function boot() {
     game.world = null;
     resolving = false;
     fateLog.replaceChildren();
+    if (fatePast) {
+      fatePast.replaceChildren();
+    }
     choiceDock.replaceChildren();
     clearRealmArt();
     hideResume();
@@ -5793,6 +5803,9 @@ function boot() {
     resolving = true;
     window.clearInterval(typeTimer);
     fateLog.replaceChildren();
+    if (fatePast) {
+      fatePast.replaceChildren();
+    }
     choiceDock.replaceChildren();
     clearRealmArt();
     hideResume();
@@ -5857,6 +5870,9 @@ function boot() {
     quizError.textContent = "";
     resetWheelFace();
     fateLog.replaceChildren();
+    if (fatePast) {
+      fatePast.replaceChildren();
+    }
     choiceDock.replaceChildren();
     clearRealmArt();
     hideResume();
