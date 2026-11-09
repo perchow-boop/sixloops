@@ -597,7 +597,7 @@ window.humanEnding = {
       id: "human-battery",
       priority: 0,
       name: "路人甲乙丙",
-      art: "ending/human-battery.jpg",
+      art: "ending/human_battery.jpg",
       text: "存在感歸零，NPC嫌戲少。\n在人間當了幾十年背景板，\n最終悄無聲息地登出。",
     },
   ],

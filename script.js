@@ -1,6 +1,7 @@
 "use strict";
 
 /* 六道輪迴
+ * 靜態資源路徑經 assetPath()，以 script.js 所在目錄為根，避免 GitHub Pages 子路徑（/sixloops）或網址缺尾斜線時相對路徑指到站台根目錄。
  * 開局：福報／慧根／貪／嗔／痴／定力皆以 10 為基數；三題在其上加減（單項約 2–10），不再用三問加減靈氣。出生日期是種子，只對 STAT_KEYS 每一項做 -3 到 +3 的固定偏移（定力不受生辰偏移）。
  * stats.cultivation 是隱藏靈氣（修仙值），stats.tech 是隱藏科技值，畫面上都不顯示數字。
  * 中陰：六道以起點機率起步（餓鬼 25、修羅 18、畜生 17、人 20、天 10、地獄 10），再按加權分數縮放扇面（錨點含定力基數 10）。定力由三問帶入第一輪輪盤；投胎後定力以 22 為本世底（不再硬套 40），之後世再從上世殘值帶進。
@@ -28,6 +29,45 @@ const STAT_CAP = 350;
 const REBIRTH_DECAY = 0.5;
 const REBIRTH_CARRY_CAP = 50;
 const MAX_LOOPS = 10;
+
+function siteAssetBase() {
+  if (typeof document === "undefined") {
+    return "";
+  }
+  const scripts = document.getElementsByTagName("script");
+  let i = scripts.length - 1;
+  for (; i >= 0; i -= 1) {
+    const src = scripts[i].src || scripts[i].getAttribute("src") || "";
+    if (/script\.js(?:\?|#|$)/i.test(src)) {
+      return src.replace(/[^/]*script\.js(?:\?.*)?(?:#.*)?$/i, "");
+    }
+  }
+  if (typeof window === "undefined" || !window.location) {
+    return "";
+  }
+  let path = window.location.pathname || "/";
+  if (/\/index\.html$/i.test(path)) {
+    return path.replace(/\/index\.html$/i, "/");
+  }
+  if (!path.endsWith("/")) {
+    return path + "/";
+  }
+  return path;
+}
+
+const ASSET_BASE = siteAssetBase();
+
+function assetPath(rel) {
+  const raw = String(rel || "");
+  if (!raw) {
+    return ASSET_BASE || "";
+  }
+  if (/^(?:https?:|data:|blob:)/i.test(raw)) {
+    return raw;
+  }
+  const clean = raw.replace(/^\.\//, "").replace(/^\//, "");
+  return (ASSET_BASE || "") + clean;
+}
 
 const QUESTIONS = [
   {
@@ -1316,7 +1356,7 @@ function realmArtScene(turnCount) {
 function realmArtPath(realmId, scene) {
   const prefix = REALM_ART_PREFIX[realmId] || realmId;
   const slot = String((scene || 0) + 1).padStart(2, "0");
-  return "images/realms/" + prefix + "_realm" + slot + ".jpg";
+  return assetPath("images/realms/" + prefix + "_realm" + slot + ".jpg");
 }
 
 const REALM_SPRITE_SHAKE_MS = 900;
@@ -1365,7 +1405,7 @@ const REALM_SPRITES = {
 };
 
 function realmSpriteFramePath(spec, index) {
-  return spec.folder + "/" + spec.prefix + String(index).padStart(2, "0") + ".png";
+  return assetPath(spec.folder + "/" + spec.prefix + String(index).padStart(2, "0") + ".png");
 }
 
 function realmSpritePath(realmId, questionIndex) {
@@ -3212,7 +3252,7 @@ function rememberEndingPlate(world, finale) {
   }
   world.life.plate = {
     id: finale.id || "",
-    src: finale.art,
+    src: assetPath(finale.art),
     name: finale.name,
     text: finale.text,
     soulTag: "",
