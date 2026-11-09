@@ -3626,6 +3626,55 @@ function formatPercent(percent) {
   return percent.toFixed(1) + "%";
 }
 
+// 手機／窄螢幕以桌面設計寬為基準整體縮放，版面比例與電腦一致。
+const DESKTOP_UI_WIDTH = 1100;
+const DESKTOP_UI_HEIGHT = 720;
+let uiScaleLock = false;
+let uiScaleTimer = 0;
+
+function fitDesktopFrame() {
+  if (typeof window === "undefined" || typeof document === "undefined" || uiScaleLock) {
+    return;
+  }
+  uiScaleLock = true;
+  const root = document.documentElement;
+  const supportsZoom = "zoom" in root.style || typeof root.style.zoom === "string";
+  const prevZoom = root.style.zoom;
+  if (supportsZoom) {
+    root.style.zoom = "";
+  }
+  const vw = Math.max(320, Math.round(window.innerWidth || DESKTOP_UI_WIDTH));
+  const vh = Math.max(320, Math.round(window.innerHeight || DESKTOP_UI_HEIGHT));
+  const scale = Math.min(1, vw / DESKTOP_UI_WIDTH, vh / DESKTOP_UI_HEIGHT);
+  root.style.setProperty("--desktop-ui-width", DESKTOP_UI_WIDTH + "px");
+  root.style.setProperty("--desktop-ui-height", DESKTOP_UI_HEIGHT + "px");
+  root.style.setProperty("--ui-scale", String(scale));
+  root.classList.toggle("is-ui-scaled", scale < 0.999);
+  if (supportsZoom) {
+    root.style.zoom = scale < 0.999 ? String(scale) : "";
+    root.classList.toggle("is-ui-zoom", scale < 0.999);
+  } else if (prevZoom) {
+    root.style.zoom = "";
+  }
+  uiScaleLock = false;
+}
+
+function scheduleDesktopFrame() {
+  window.clearTimeout(uiScaleTimer);
+  uiScaleTimer = window.setTimeout(fitDesktopFrame, 50);
+}
+
+function bootDesktopFrame() {
+  fitDesktopFrame();
+  window.addEventListener("resize", scheduleDesktopFrame);
+  window.addEventListener("orientationchange", function onOrient() {
+    window.setTimeout(fitDesktopFrame, 120);
+  });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", scheduleDesktopFrame);
+  }
+}
+
 function bootOrientTip() {
   const tip = document.getElementById("orient-tip");
   const closeBtn = document.getElementById("orient-tip-close");
@@ -3653,6 +3702,7 @@ function bootOrientTip() {
 }
 
 function boot() {
+  bootDesktopFrame();
   bootOrientTip();
   const birthForm = document.getElementById("birth-form");
   const birthInput = document.getElementById("birth-date");

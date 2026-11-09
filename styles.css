@@ -17,6 +17,9 @@
   --serif: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
   --spin: 3000ms;
   --ease: 180ms ease;
+  --desktop-ui-width: 1100px;
+  --desktop-ui-height: 720px;
+  --ui-scale: 1;
 }
 
 * {
@@ -26,6 +29,33 @@
 html {
   color-scheme: dark;
   overflow-x: clip;
+}
+
+/* 無 zoom 支援時：以桌面寬度為畫布，等比縮放置中 */
+html.is-ui-scaled:not(.is-ui-zoom) {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+html.is-ui-scaled:not(.is-ui-zoom) body {
+  width: var(--desktop-ui-width);
+  min-height: max(100vh, calc(100vh / var(--ui-scale)));
+  margin-left: auto;
+  margin-right: auto;
+  transform: scale(var(--ui-scale));
+  transform-origin: top center;
+}
+
+html.is-ui-scaled:not(.is-ui-zoom) body.is-playing {
+  min-height: calc(100vh / var(--ui-scale));
+  height: calc(100vh / var(--ui-scale));
+}
+
+html.is-ui-scaled:not(.is-ui-zoom) .play {
+  width: var(--desktop-ui-width);
+  left: 50%;
+  right: auto;
+  margin-left: calc(var(--desktop-ui-width) / -2);
 }
 
 body {
@@ -2584,152 +2614,10 @@ body[data-aura="good"] .rebirth-panel {
   outline-offset: 3px;
 }
 
-@media (max-width: 860px) {
+/* 窄螢幕改由 --ui-scale／zoom 等比縮小桌面版面，不再改寫欄位結構以免比例走樣 */
+@media (max-width: 1100px) {
   .margin-note {
     display: none;
-  }
-
-  .ending-flip {
-    width: min(380px, 100%);
-    max-width: none;
-  }
-
-  .ending-flip__face--back .diagnostic-card {
-    padding: 14px 12px 22px;
-  }
-
-  .ending-flip__face--back .diagnostic-card__title {
-    font-size: 20px;
-    letter-spacing: 0.14em;
-  }
-
-  .ending-flip__face--back .diagnostic-card__field {
-    margin-bottom: 10px;
-    font-size: 15px;
-  }
-
-  .ending-flip__face--back .diagnostic-card__ring {
-    width: min(100%, 210px);
-  }
-}
-
-@media (max-width: 640px) {
-  .stage {
-    width: min(680px, calc(100% - 32px));
-    padding-top: 40px;
-  }
-
-  h1 {
-    letter-spacing: 0.08em;
-  }
-
-  .brand-hero {
-    letter-spacing: 0.14em;
-    font-size: clamp(36px, 11vw, 52px);
-  }
-
-  .prelude {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
-  .prelude li:not(:last-child)::after {
-    display: none;
-  }
-
-  .stat-board {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .stat {
-    grid-template-columns: 3.4em 1fr 2.2em;
-    gap: 10px;
-  }
-
-  .birth-panel,
-  .reading-panel,
-  .wheel-layout {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-
-  .legend-list {
-    grid-template-columns: 1fr 1fr;
-    gap: 18px 12px;
-  }
-
-  .hud-stats {
-    padding: 6px 8px;
-  }
-
-  .hud-stats__row {
-    grid-template-columns: 6.8em minmax(0, 1fr) 4.8em;
-    gap: 4px 8px;
-  }
-
-  .hud-stats__meters {
-    gap: 8px;
-  }
-
-  .hud-stat {
-    grid-template-columns: 2.2em minmax(0, 1fr) 1.8em;
-    column-gap: 8px;
-    width: auto;
-    font-size: 10px;
-  }
-
-  .dashboard__title {
-    letter-spacing: 0.1em;
-    font-size: 13px;
-  }
-
-  .soul-bar__realm {
-    letter-spacing: 0.08em;
-    font-size: 10px;
-  }
-
-  .soul-bar__age {
-    font-size: 10px;
-  }
-
-  .soul-bar {
-    padding-top: 6px;
-    padding-bottom: 6px;
-  }
-
-  .hud-float {
-    top: auto;
-    right: 0;
-    bottom: calc(100% + 2px);
-    animation: hud-float-up 820ms ease forwards;
-  }
-
-  .wheel-glow {
-    inset: 8%;
-    filter: blur(16px);
-  }
-
-  .wheel-layout {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .wheel-stage {
-    width: min(360px, calc(100% - 28px));
-    margin: 0 auto;
-  }
-
-  .actions--wheel {
-    flex-wrap: wrap;
-  }
-
-  .realm-legend .legend-list {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .soul-bar__age {
-    margin-left: 0;
   }
 }
 
