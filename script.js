@@ -3626,9 +3626,10 @@ function formatPercent(percent) {
   return percent.toFixed(1) + "%";
 }
 
-// 手機／窄螢幕以桌面設計寬為基準整體縮放，版面比例與電腦一致。
+// 窄螢幕以桌面版面為基準等比縮放。直立依寬度適配（可直向捲動）；橫向再兼顧高度。
 const DESKTOP_UI_WIDTH = 1100;
 const DESKTOP_UI_HEIGHT = 720;
+const PORTRAIT_UI_WIDTH = 760;
 let uiScaleLock = false;
 let uiScaleTimer = 0;
 
@@ -3645,11 +3646,16 @@ function fitDesktopFrame() {
   }
   const vw = Math.max(320, Math.round(window.innerWidth || DESKTOP_UI_WIDTH));
   const vh = Math.max(320, Math.round(window.innerHeight || DESKTOP_UI_HEIGHT));
-  const scale = Math.min(1, vw / DESKTOP_UI_WIDTH, vh / DESKTOP_UI_HEIGHT);
-  root.style.setProperty("--desktop-ui-width", DESKTOP_UI_WIDTH + "px");
+  const portrait = vh >= vw;
+  const designW = portrait ? PORTRAIT_UI_WIDTH : DESKTOP_UI_WIDTH;
+  const scale = portrait
+    ? Math.min(1, vw / designW)
+    : Math.min(1, vw / DESKTOP_UI_WIDTH, vh / DESKTOP_UI_HEIGHT);
+  root.style.setProperty("--desktop-ui-width", designW + "px");
   root.style.setProperty("--desktop-ui-height", DESKTOP_UI_HEIGHT + "px");
   root.style.setProperty("--ui-scale", String(scale));
   root.classList.toggle("is-ui-scaled", scale < 0.999);
+  root.classList.toggle("is-ui-portrait", portrait);
   if (supportsZoom) {
     root.style.zoom = scale < 0.999 ? String(scale) : "";
     root.classList.toggle("is-ui-zoom", scale < 0.999);
@@ -3675,35 +3681,8 @@ function bootDesktopFrame() {
   }
 }
 
-function bootOrientTip() {
-  const tip = document.getElementById("orient-tip");
-  const closeBtn = document.getElementById("orient-tip-close");
-  if (!tip || !closeBtn) {
-    return;
-  }
-  const key = "sixloops-orient-tip-dismissed";
-  let dismissed = false;
-  try {
-    dismissed = window.sessionStorage.getItem(key) === "1";
-  } catch (err) {
-    dismissed = false;
-  }
-  if (dismissed) {
-    document.body.classList.add("orient-tip-dismissed");
-  }
-  closeBtn.addEventListener("click", function dismissOrientTip() {
-    document.body.classList.add("orient-tip-dismissed");
-    try {
-      window.sessionStorage.setItem(key, "1");
-    } catch (err) {
-      /* ignore */
-    }
-  });
-}
-
 function boot() {
   bootDesktopFrame();
-  bootOrientTip();
   const birthForm = document.getElementById("birth-form");
   const birthInput = document.getElementById("birth-date");
   const birthError = document.getElementById("birth-error");

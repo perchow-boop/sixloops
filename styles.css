@@ -31,7 +31,7 @@ html {
   overflow-x: clip;
 }
 
-/* 無 zoom 支援時：以桌面寬度為畫布，等比縮放置中 */
+/* 無 zoom 支援時：以設計寬為畫布，等比縮放置中 */
 html.is-ui-scaled:not(.is-ui-zoom) {
   height: 100%;
   overflow-x: hidden;
@@ -51,11 +51,27 @@ html.is-ui-scaled:not(.is-ui-zoom) body.is-playing {
   height: calc(100vh / var(--ui-scale));
 }
 
+/* 直立：只依寬度縮放，高度可捲動，避免整頁被壓太小 */
+html.is-ui-portrait.is-ui-scaled:not(.is-ui-zoom) body.is-playing {
+  height: auto;
+  min-height: calc(100vh / var(--ui-scale));
+  overflow-y: auto;
+}
+
 html.is-ui-scaled:not(.is-ui-zoom) .play {
   width: var(--desktop-ui-width);
   left: 50%;
   right: auto;
   margin-left: calc(var(--desktop-ui-width) / -2);
+}
+
+html.is-ui-portrait .stage {
+  width: min(720px, calc(100% - 36px));
+}
+
+html.is-ui-portrait .soul-bar {
+  padding-left: max(16px, calc((100% - 760px) / 2));
+  padding-right: max(16px, calc((100% - 760px) / 2));
 }
 
 body {
@@ -97,6 +113,16 @@ body.is-playing {
   overflow: hidden;
 }
 
+html.is-ui-portrait body.is-playing {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+html.is-ui-portrait body.is-playing .play {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 body.is-playing .margin-note,
 body.is-playing .stage {
   display: none;
@@ -105,70 +131,6 @@ body.is-playing .stage {
 ::selection {
   background: rgba(228, 201, 138, 0.28);
   color: var(--ink);
-}
-
-.orient-tip {
-  display: none;
-  position: fixed;
-  top: max(12px, env(safe-area-inset-top));
-  left: 50%;
-  z-index: 80;
-  box-sizing: border-box;
-  width: min(calc(100% - 28px), 420px);
-  transform: translateX(-50%);
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px 10px 16px;
-  border: 1px solid rgba(228, 201, 138, 0.28);
-  border-radius: 999px;
-  background:
-    linear-gradient(135deg, rgba(28, 34, 44, 0.92), rgba(18, 22, 30, 0.88));
-  box-shadow:
-    0 10px 28px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(14px);
-  color: var(--ink);
-  pointer-events: auto;
-}
-
-.orient-tip__text {
-  flex: 1;
-  margin: 0;
-  color: rgba(232, 234, 239, 0.92);
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  line-height: 1.45;
-  text-align: center;
-}
-
-.orient-tip__close {
-  flex: none;
-  width: 28px;
-  height: 28px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(232, 234, 239, 0.78);
-  font: inherit;
-  font-size: 18px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.orient-tip__close:hover,
-.orient-tip__close:focus-visible {
-  background: rgba(228, 201, 138, 0.22);
-  color: var(--ink);
-  outline: none;
-}
-
-@media (orientation: portrait) and (max-width: 900px) {
-  body:not(.orient-tip-dismissed) .orient-tip {
-    display: flex;
-  }
 }
 
 .margin-note {
