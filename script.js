@@ -3116,14 +3116,12 @@ function mountFateRing(host, world) {
   svg.appendChild(frame);
   axes.forEach(function mark(axis, index) {
     const at = fatePoint(index, outer, cx, cy);
-    const star = svgNode("text");
-    star.setAttribute("x", at[0].toFixed(1));
-    star.setAttribute("y", at[1].toFixed(1));
+    const star = svgNode("circle");
+    star.setAttribute("cx", at[0].toFixed(1));
+    star.setAttribute("cy", at[1].toFixed(1));
+    star.setAttribute("r", "3.1");
     star.setAttribute("class", "fate-ring__star");
     star.setAttribute("fill", axis.color);
-    star.setAttribute("font-size", "13");
-    //star.textContent = "★";
-    star.textContent = "⚫︎";
     svg.appendChild(star);
     const label = svgNode("text");
     const upright = index === 0 || index === 3;
@@ -3133,7 +3131,8 @@ function mountFateRing(host, world) {
     label.setAttribute("dominant-baseline", index === 3 ? "hanging" : (index === 0 ? "auto" : "middle"));
     label.setAttribute("class", "fate-ring__label");
     label.setAttribute("fill", axis.color);
-    label.setAttribute("font-size", "16");
+    label.setAttribute("font-size", "18.5");
+    label.setAttribute("font-weight", "700");
     label.textContent = axis.name + axis.value;
     svg.appendChild(label);
   });
@@ -4785,11 +4784,11 @@ function boot() {
       }
       const computed = window.getComputedStyle(el);
       const fill = shareColor(computed.fill) || el.getAttribute("fill") || "#ffffff";
-      const fontSize = parseFloat(el.getAttribute("font-size")) || 16;
+      const fontSize = parseFloat(el.getAttribute("font-size")) || 18.5;
       const anchor = el.getAttribute("text-anchor") || "start";
       const baseline = el.getAttribute("dominant-baseline") || "auto";
       ctx.save();
-      ctx.font = "400 " + fontSize + "px sans-serif";
+      ctx.font = "700 " + fontSize + "px sans-serif";
       ctx.textAlign = anchor === "middle" ? "center" : (anchor === "end" ? "right" : "left");
       if (baseline === "central" || baseline === "middle") {
         ctx.textBaseline = "middle";
@@ -4803,13 +4802,13 @@ function boot() {
         ctx.fillStyle = fill;
         ctx.arc(x, y, 3.2, 0, Math.PI * 2);
         ctx.fill();
-        ctx.lineWidth = 1.2;
-        ctx.strokeStyle = "rgba(6,8,16,0.92)";
+        ctx.lineWidth = 0.9;
+        ctx.strokeStyle = "rgba(22,11,8,0.65)";
         ctx.stroke();
       } else {
         const text = el.textContent || "";
         ctx.lineWidth = 2.4;
-        ctx.strokeStyle = "rgba(6,8,16,0.92)";
+        ctx.strokeStyle = "rgba(42,24,16,0.92)";
         ctx.lineJoin = "round";
         ctx.strokeText(text, x, y);
         ctx.fillStyle = fill;
@@ -4975,7 +4974,7 @@ function boot() {
       }
       const body = endingPlateText.textContent || "";
       if (body) {
-        const fontPx = w * 0.032;
+        const fontPx = w * 0.037;
         const maxWidth = w * 0.8;
         ctx.fillStyle = "#3c291c";
         ctx.textAlign = "center";
@@ -5045,7 +5044,7 @@ function boot() {
     }
     const body = endingPlateText.textContent || "";
     if (body) {
-      const fontPx = w * 0.032;
+      const fontPx = w * 0.037;
       const maxWidth = w * 0.8;
       ctx.fillStyle = "#3c291c";
       ctx.textAlign = "center";

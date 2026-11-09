@@ -1652,7 +1652,7 @@ body[data-aura="good"] .rebirth-panel {
   overflow: hidden;
   scrollbar-width: none;
   border-radius: 22px;
-  padding: 12px 12px 18px;
+  padding: 16px 16px 22px;
   box-shadow: none;
 }
 
@@ -1668,71 +1668,72 @@ body[data-aura="good"] .rebirth-panel {
 }
 
 .ending-flip__face--back .diagnostic-card__corners {
-  font-size: 12px;
+  font-size: 16px;
 }
 
 .ending-flip__face--back .diagnostic-card__title {
-  margin: 0 0 2px;
-  padding-bottom: 4px;
-  font-size: 15px;
-  letter-spacing: 0.1em;
+  margin: 2px 0 2px;
+  padding-bottom: 8px;
+  font-size: 22px;
+  letter-spacing: 0.14em;
 }
 
 .ending-flip__face--back .diagnostic-card__subtitle {
-  margin: 0 0 3px;
-  font-size: 10px;
+  margin: 0 0 6px;
+  font-size: 13px;
 }
 
 .ending-flip__face--back .diagnostic-card__cycle {
-  margin: 0 2px 6px;
-  font-size: 11px;
-  line-height: 1.4;
+  margin: 0 4px 10px;
+  font-size: 14px;
+  line-height: 1.45;
 }
 
 .ending-flip__face--back .diagnostic-card__fields {
   flex: 0 0 auto;
-  margin-bottom: 0;
+  margin-bottom: 4px;
 }
 
 .ending-flip__face--back .diagnostic-card__field {
-  margin-bottom: 5px;
-  font-size: 11.5px;
-  line-height: 1.4;
+  margin-bottom: 10px;
+  font-size: 15.5px;
+  line-height: 1.5;
 }
 
 .ending-flip__face--back .diagnostic-card__label {
-  font-size: 10.5px;
+  font-size: 14.5px;
 }
 
 .ending-flip__face--back .diagnostic-card__value {
-  font-size: 11.5px;
-  line-height: 1.4;
+  font-size: 15.5px;
+  line-height: 1.5;
 }
 
 .ending-flip__face--back .diagnostic-card__chart {
   flex: 1 1 auto;
-  margin-top: 2px;
+  margin-top: 4px;
   padding-bottom: 2px;
   min-height: 0;
 }
 
 .ending-flip__face--back .diagnostic-card__ring {
-  width: min(100%, 160px);
+  width: min(100%, 230px);
 }
 
 .ending-flip__face--back .diagnostic-card__ring .fate-ring__label {
-  font-size: 10.5px;
+  font-size: 17.5px;
+  font-weight: 700;
 }
 
 .ending-flip__face--back .diagnostic-card__ring .fate-ring__extra {
-  font-size: 9.5px;
+  font-size: 13px;
 }
 
 .ending-flip__face--back .diagnostic-card__stamp {
-  right: 10px;
-  bottom: 12px;
-  max-width: 40%;
-  font-size: 10px;
+  right: 12px;
+  bottom: 14px;
+  max-width: 42%;
+  font-size: 13px;
 }
 
 .ending-flip__hint {
@@ -1911,17 +1912,27 @@ body[data-aura="good"] .rebirth-panel {
   background: transparent;
 }
 
-.diagnostic-card__ring .fate-ring__label,
+.diagnostic-card__ring .fate-ring__label {
+  font-weight: 700;
+  paint-order: stroke fill;
+  /* 深咖啡色描邊，提高可讀 */
+  stroke: rgba(42, 24, 16, 0.92);
+  stroke-width: 2.4px;
+  stroke-linejoin: round;
+}
+
 .diagnostic-card__ring .fate-ring__star {
-  paint-order: stroke;
-  stroke: rgb(22, 11, 8);
-  stroke-width: 3.3px;
+  /* SVG circle 頂點，避免文字「‧／⚫︎」在手機上描邊過粗 */
+  stroke: rgba(22, 11, 8, 0.65);
+  stroke-width: 0.9px;
+  vector-effect: non-scaling-stroke;
 }
 
 .diagnostic-card__ring .fate-ring__core {
   fill: #9c2424;
   stroke: rgba(42, 30, 27, 0.85);
-  stroke-width: 1.4px;
+  stroke-width: 1.2px;
+  vector-effect: non-scaling-stroke;
 }
 
 .diagnostic-card__ring .fate-ring__extra {
@@ -2045,7 +2056,7 @@ body[data-aura="good"] .rebirth-panel {
   white-space: pre-line;
   color: #3c291c;
   font-family: "Noto Serif TC", "Noto Serif CJK TC", serif;
-  font-size: 3.2cqw;
+  font-size: 3.7cqw;
   font-weight: 500;
   line-height: 1.45;
   letter-spacing: 0.04em;
@@ -2185,9 +2196,9 @@ body[data-aura="good"] .rebirth-panel {
 }
 
 .fate-ring__star {
-  font-family: var(--sans);
-  text-anchor: middle;
-  dominant-baseline: central;
+  stroke: rgba(6, 8, 16, 0.55);
+  stroke-width: 0.9px;
+  vector-effect: non-scaling-stroke;
 }
 
 .fate-ring__core {
@@ -2198,7 +2209,7 @@ body[data-aura="good"] .rebirth-panel {
 
 .fate-ring__label {
   font-family: var(--sans);
-  font-weight: 400;
+  font-weight: 700;
 }
 
 .fate-ring__extra {
@@ -2728,6 +2739,23 @@ body[data-aura="good"] .rebirth-panel {
 
   .choice-card__label {
     font-size: 17px;
+  }
+
+  /* 手機：深咖描邊略收，避免過粗 */
+  .diagnostic-card__ring .fate-ring__label {
+    stroke-width: 1.6px;
+    stroke: rgba(42, 24, 16, 0.88);
+  }
+
+  .diagnostic-card__ring .fate-ring__star,
+  .fate-ring__star {
+    stroke-width: 0.7px;
+    stroke: rgba(22, 11, 8, 0.55);
+  }
+
+  .ending-flip__face--back .diagnostic-card__ring .fate-ring__label {
+    font-size: 16px;
+    font-weight: 700;
   }
 }
 
