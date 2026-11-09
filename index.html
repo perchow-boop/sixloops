@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>六道輪迴</title>
+  <meta name="description" content="六道輪迴模擬器：靈魂三問、命運輪盤，以及一條一條浮現的此世。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="orient-tip" id="orient-tip" role="status" aria-live="polite">
+    <p class="orient-tip__text">建議橫屏遊玩以獲得最佳體驗</p>
+    <button type="button" class="orient-tip__close" id="orient-tip-close" aria-label="關閉橫屏提示">×</button>
+  </div>
+  <p class="margin-note">六道輪迴 · 因果 · 輪盤</p>
+  <main class="stage">
+    <p id="live" class="sr-only" aria-live="polite"></p>
+
+    <section id="screen-gate" class="screen screen--gate">
+      <p class="screen__index">開局</p>
+      <h1 class="brand-hero">六道輪迴</h1>
+      <p class="lead lead--gate">三道靈魂測試，再留下出生的那一天。<br>底數定了之後，中陰的輪盤會按業力張開。</p>
+      <ol class="prelude" aria-label="開局流程">
+        <li><span class="prelude__num">壹</span><span class="prelude__label">生辰</span></li>
+        <li><span class="prelude__num">貳</span><span class="prelude__label">三問</span></li>
+        <li><span class="prelude__num">參</span><span class="prelude__label">心性</span></li>
+        <li><span class="prelude__num">肆</span><span class="prelude__label">輪盤</span></li>
+      </ol>
+      <div class="actions">
+        <button type="button" class="btn btn--solid" id="start-btn">入局</button>
+      </div>
+    </section>
+
+    <section id="screen-birth" class="screen screen--birth" hidden>
+      <p class="screen__index">壹 · 生辰</p>
+      <h1>留下你的種子</h1>
+      <p class="lead">這一天是因果的種子。同樣的回答，換一天出生，底數仍會有細微的不同。</p>
+      <form id="birth-form" class="birth-panel" novalidate>
+        <label class="field" for="birth-date">
+          <span class="field__label">出生日期</span>
+          <input id="birth-date" name="birth" type="date" autocomplete="bday" required aria-describedby="birth-error">
+        </label>
+        <p id="birth-error" class="form-error" role="alert"></p>
+        <div class="actions">
+          <button type="button" class="btn btn--ghost" id="birth-back">返回</button>
+          <button type="submit" class="btn btn--solid">前往三問</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="screen-quiz" class="screen screen--quiz" hidden>
+      <p class="screen__index">貳 · 靈魂三問</p>
+      <p class="steps" id="quiz-steps" aria-hidden="true">
+        <span>壹</span>
+        <span>貳</span>
+        <span>參</span>
+      </p>
+      <h1 id="quiz-title">取捨</h1>
+      <p class="lead lead--quiz" id="quiz-prompt"></p>
+      <fieldset class="choices">
+        <legend class="sr-only" id="quiz-legend">取捨</legend>
+        <div id="quiz-options"></div>
+      </fieldset>
+      <p id="quiz-error" class="form-error" role="alert"></p>
+      <div class="actions">
+        <button type="button" class="btn btn--ghost" id="quiz-back">返回生辰</button>
+      </div>
+    </section>
+
+    <section id="screen-result" class="screen screen--result" hidden>
+      <p class="screen__index">參 · 心性</p>
+      <h1>此世心性</h1>
+      <p class="birth-echo" id="birth-echo"></p>
+
+      <div class="stat-board">
+        <section class="stat-group" aria-labelledby="virtue-label">
+          <h2 id="virtue-label" class="stat-group__title">善緣</h2>
+          <article class="stat" data-stat="merit">
+            <p class="stat__name">福報</p>
+            <div class="stat__track" role="meter" aria-label="福報" aria-valuemin="0" aria-valuemax="350" aria-valuenow="0">
+              <span class="stat__fill"></span>
+            </div>
+            <p class="stat__value">—</p>
+          </article>
+          <article class="stat" data-stat="wisdom">
+            <p class="stat__name">慧根</p>
+            <div class="stat__track" role="meter" aria-label="慧根" aria-valuemin="0" aria-valuemax="350" aria-valuenow="0">
+              <span class="stat__fill"></span>
+            </div>
+            <p class="stat__value">—</p>
+          </article>
+          <article class="stat" data-stat="composure">
+            <p class="stat__name">定力</p>
+            <div class="stat__track" role="meter" aria-label="定力" aria-valuemin="0" aria-valuemax="350" aria-valuenow="0">
+              <span class="stat__fill"></span>
+            </div>
+            <p class="stat__value">—</p>
+          </article>
+        </section>
+
+        <section class="stat-group" aria-labelledby="poison-label">
+          <h2 id="poison-label" class="stat-group__title">三毒</h2>
+          <article class="stat" data-stat="greed">
+            <p class="stat__name">貪</p>
+            <div class="stat__track" role="meter" aria-label="貪" aria-valuemin="0" aria-valuemax="350" aria-valuenow="0">
+              <span class="stat__fill"></span>
+            </div>
+            <p class="stat__value">—</p>
+          </article>
+          <article class="stat" data-stat="anger">
+            <p class="stat__name">嗔</p>
+            <div class="stat__track" role="meter" aria-label="嗔" aria-valuemin="0" aria-valuemax="350" aria-valuenow="0">
+              <span class="stat__fill"></span>
+            </div>
+            <p class="stat__value">—</p>
+          </article>
+          <article class="stat" data-stat="ignorance">
+            <p class="stat__name">痴</p>
+            <div class="stat__track" role="meter" aria-label="痴" aria-valuemin="0" aria-valuemax="350" aria-valuenow="0">
+              <span class="stat__fill"></span>
+            </div>
+            <p class="stat__value">—</p>
+          </article>
+        </section>
+      </div>
+
+      <aside class="reading-panel">
+        <p class="reading__label" id="reading-label"></p>
+        <p class="lead reading__body" id="reading-body"></p>
+        <p class="whisper" id="whisper" hidden></p>
+      </aside>
+      <p class="footnote">六項皆以 10 為底，主因果來自三問加減。生辰只對福報、慧根、三毒與隱藏值撥動少許餘數，不定力。接下來，這些底數會變成輪盤上的扇面。</p>
+      <div class="actions">
+        <button type="button" class="btn btn--ghost" id="restart-btn">重新開局</button>
+        <button type="button" class="btn btn--solid" id="enter-bardo-btn">入中陰</button>
+      </div>
+    </section>
+
+    <section id="screen-wheel" class="screen screen--wheel" hidden>
+      <p class="screen__index">肆 · 中陰</p>
+      <h1>命運輪盤</h1>
+      <p class="lead">按下之後輪盤急轉，三秒後慢慢停下，指針所指即是下一道。</p>
+      <p class="wheel-cycle" id="wheel-cycle">第 1／10 次進入輪迴</p>
+      <div class="wheel-layout">
+        <div class="wheel-stage" id="wheel-stage">
+          <div class="wheel-glow" id="wheel-glow"></div>
+          <div class="wheel-rim" aria-hidden="true"></div>
+          <div class="wheel" id="wheel" role="img" aria-label="命運輪盤"></div>
+          <div class="wheel-sheen" aria-hidden="true"></div>
+          <div class="wheel-hub" aria-hidden="true">業</div>
+          <div class="wheel-pointer" aria-hidden="true"></div>
+        </div>
+        <aside class="wheel-side">
+          <p class="whisper wheel-seam" id="wheel-seam" hidden></p>
+          <div id="realm-legend" class="realm-legend"></div>
+        </aside>
+      </div>
+      <p class="skip-visited__note" id="skip-visited-note" hidden></p>
+      <div class="actions actions--wheel">
+        <button type="button" class="btn btn--ghost" id="wheel-back">返回</button>
+        <button type="button" class="btn btn--solid" id="spin-btn">投入輪迴</button>
+        <label class="skip-visited">
+          <input type="checkbox" id="skip-visited">
+          <span>跳過曾經進入過的世界</span>
+        </label>
+      </div>
+    </section>
+
+    <section id="screen-rebirth" class="screen screen--rebirth" hidden>
+      <p class="screen__index">伍 · 投胎</p>
+      <h1 class="rebirth-title" id="rebirth-title"></h1>
+      <aside class="rebirth-panel">
+        <p class="lead rebirth-detail" id="rebirth-detail"></p>
+      </aside>
+      <div class="actions">
+        <button type="button" class="btn btn--solid" id="enter-world-btn">踏入此道</button>
+      </div>
+    </section>
+
+    <noscript>
+      <p class="lead">此模擬器需要啟用 JavaScript，才能計算開局數值。</p>
+    </noscript>
+  </main>
+
+  <section id="screen-world" class="screen play" hidden>
+    <h1 class="sr-only" id="world-title">此世</h1>
+    <header class="soul-bar">
+      <div class="hud-stats" id="hud-stats" aria-label="靈魂儀表板">
+        <div class="hud-stats__row" aria-label="善緣">
+          <p class="dashboard__title hud-stats__lead">靈魂儀表板</p>
+          <div class="hud-stats__meters">
+            <div class="hud-stat" data-stat="merit">
+              <span class="hud-stat__name">福報</span>
+              <span class="hud-stat__track" role="meter" aria-label="福報" aria-valuemin="0" aria-valuemax="350" aria-valuenow="0"><span class="hud-stat__fill"></span></span>
+              <span class="hud-stat__readout"><span class="hud-stat__value">0</span></span>
+            </div>
+            <div class="hud-stat" data-stat="wisdom">
+              <span class="hud-stat__name">慧根</span>
+              <span class="hud-stat__track" role="meter" aria-label="慧根" aria-valuemin="0" aria-valuemax="350" aria-valuenow="0"><span class="hud-stat__fill"></span></span>
+              <span class="hud-stat__readout"><span class="hud-stat__value">0</span></span>
+            </div>
+            <div class="hud-stat" data-stat="composure" id="hud-composure" hidden>
+              <span class="hud-stat__name">定力</span>
+              <span class="hud-stat__track" role="meter" aria-label="定力" aria-valuemin="0" aria-valuemax="350" aria-valuenow="0"><span class="hud-stat__fill"></span></span>
+              <span class="hud-stat__readout"><span class="hud-stat__value">0</span></span>
+            </div>
+            <div class="hud-stat" data-stat="spirit" id="hud-spirit" hidden>
+              <span class="hud-stat__name">靈性</span>
+              <span class="hud-stat__track" role="meter" aria-label="靈性" aria-valuemin="0" aria-valuemax="350" aria-valuenow="0"><span class="hud-stat__fill"></span></span>
+              <span class="hud-stat__readout"><span class="hud-stat__value">0</span></span>
+            </div>
+          </div>
+          <p id="hud-age" class="soul-bar__age hud-stats__trail"></p>
+        </div>
+        <div class="hud-stats__row" aria-label="三毒">
+          <div class="hud-stats__lead hud-stats__realm">
+            <p id="hud-realm" class="soul-bar__realm"></p>
+            <p id="hud-species" class="soul-bar__species" hidden></p>
+            <p id="hud-stage" class="soul-bar__stage" hidden></p>
+          </div>
+          <div class="hud-stats__meters">
+            <div class="hud-stat" data-stat="greed">
+              <span class="hud-stat__name">貪</span>
+              <span class="hud-stat__track" role="meter" aria-label="貪" aria-valuemin="0" aria-valuemax="350" aria-valuenow="0"><span class="hud-stat__fill"></span></span>
+              <span class="hud-stat__readout"><span class="hud-stat__value">0</span></span>
+            </div>
+            <div class="hud-stat" data-stat="anger">
+              <span class="hud-stat__name">嗔</span>
+              <span class="hud-stat__track" role="meter" aria-label="嗔" aria-valuemin="0" aria-valuemax="350" aria-valuenow="0"><span class="hud-stat__fill"></span></span>
+              <span class="hud-stat__readout"><span class="hud-stat__value">0</span></span>
+            </div>
+            <div class="hud-stat" data-stat="ignorance">
+              <span class="hud-stat__name">痴</span>
+              <span class="hud-stat__track" role="meter" aria-label="痴" aria-valuemin="0" aria-valuemax="350" aria-valuenow="0"><span class="hud-stat__fill"></span></span>
+              <span class="hud-stat__readout"><span class="hud-stat__value">0</span></span>
+            </div>
+          </div>
+          <div class="type-speed hud-stats__trail" id="type-speed" role="group" aria-label="題目速度">
+            <button type="button" class="type-speed__btn is-active" data-speed="3" aria-pressed="true">×3</button>
+            <button type="button" class="type-speed__btn" data-speed="5" aria-pressed="false">×5</button>
+          </div>
+        </div>
+        <div class="age-axis" id="hud-axis" hidden>
+          <span class="age-axis__track"><span id="hud-age-fill"></span></span>
+        </div>
+      </div>
+    </header>
+    <div class="realm-art" id="realm-art" hidden aria-hidden="true">
+      <div class="realm-art__frame">
+        <img class="realm-art__img" id="realm-art-img" alt="">
+        <img class="realm-art__sprite" id="realm-art-sprite" alt="" hidden>
+        <div class="realm-art__pops" id="realm-art-pops" aria-hidden="true"></div>
+      </div>
+    </div>
+    <div class="fate-log" id="fate-log"></div>
+    <div class="choice-dock" id="choice-dock" role="group" aria-label="因果抉擇"></div>
+    <div id="resume-layer" class="resume-layer" hidden>
+      <div class="resume-shell">
+        <article class="resume-card" id="resume-card" role="dialog" aria-modal="true" aria-labelledby="resume-kicker">
+          <div class="resume-layout" id="resume-layout">
+            <div class="ending-flip" id="ending-flip" hidden>
+              <div
+                class="ending-flip__scene"
+                id="ending-flip-toggle"
+                role="button"
+                tabindex="0"
+                aria-pressed="false"
+                aria-label="翻轉結局卡，查看業力診斷書"
+              >
+                <div class="ending-flip__inner" id="ending-flip-inner">
+                  <div class="ending-flip__face ending-flip__face--front">
+                    <div class="ending-plate" id="ending-plate">
+                      <img class="ending-plate__art" id="ending-plate-art" alt="">
+                      <img class="ending-plate__logo" id="ending-plate-logo" src="images/logo_font.png" alt="" aria-hidden="true">
+                      <p class="ending-plate__name" id="ending-plate-name"></p>
+                      <p class="ending-plate__realm" id="ending-plate-realm"></p>
+                      <div class="ending-plate__body">
+                        <p class="ending-plate__text" id="ending-plate-text"></p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ending-flip__face ending-flip__face--back" id="ending-flip-back">
+                    <img class="ending-plate__logo" src="images/logo_back.png" alt="" aria-hidden="true">
+                    <section class="diagnostic-card" id="menpo-note" hidden aria-label="業力診斷書">
+                      <div class="diagnostic-card__corners" aria-hidden="true"><span>☣</span><span>☠</span></div>
+                      <h3 class="diagnostic-card__title">業力診斷書</h3>
+                      <p class="diagnostic-card__subtitle">※ 業力不退費 · 下世概不認帳 ※</p>
+                      <p class="diagnostic-card__cycle" id="menpo-cycle"></p>
+                      <div class="diagnostic-card__fields">
+                        <div class="diagnostic-card__field">
+                          <span class="diagnostic-card__label">患者生辰：</span>
+                          <span class="diagnostic-card__value" id="menpo-birth"></span>
+                        </div>
+                        <div class="diagnostic-card__field">
+                          <span class="diagnostic-card__label">偏高脈象：</span>
+                          <span class="diagnostic-card__value" id="menpo-focus"></span>
+                        </div>
+                        <div class="diagnostic-card__field">
+                          <span class="diagnostic-card__label">診斷主訴：</span>
+                          <span class="diagnostic-card__value" id="menpo-chief"></span>
+                        </div>
+                        <div class="diagnostic-card__field">
+                          <span class="diagnostic-card__label">處方建議：</span>
+                          <span class="diagnostic-card__value" id="menpo-rx"></span>
+                        </div>
+                      </div>
+                      <p class="diagnostic-card__stamp" id="soul-tag" hidden></p>
+                      <div class="diagnostic-card__chart">
+                        <div class="diagnostic-card__ring" id="ending-plate-ring"></div>
+                      </div>
+                    </section>
+                  </div>
+                </div>
+              </div>
+              <p class="ending-flip__hint" id="ending-flip-hint">點擊圖片翻轉診斷書</p>
+            </div>
+          </div>
+          <p class="resume-card__kicker" id="resume-kicker">人生結算履歷卡</p>
+          <p class="resume-card__cycle" id="resume-cycle"></p>
+          <h2 class="resume-card__realm" id="resume-realm"></h2>
+          <p class="resume-card__title" id="resume-title"></p>
+          <p class="resume-card__verdict" id="resume-verdict"></p>
+          <div class="resume-card__stats" id="resume-stats"></div>
+        </article>
+        <div class="resume-footer">
+          <p class="resume-card__next" id="resume-next"></p>
+          <div class="resume-card__actions" id="resume-actions"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <script src="data/science-mapping.js"></script>
+  <script src="data/human.js"></script>
+  <script src="data/ghost.js"></script>
+  <script src="data/hell.js"></script>
+  <script src="data/animal.js"></script>
+  <script src="data/asura.js"></script>
+  <script src="data/heaven.js"></script>
+  <script src="data/immortal.js"></script>
+  <script src="data/alien.js"></script>
+  <script src="vendor/html2canvas.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
