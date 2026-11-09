@@ -3626,48 +3626,26 @@ function formatPercent(percent) {
   return percent.toFixed(1) + "%";
 }
 
-// 窄螢幕以桌面版面為基準等比縮放。直立依寬度適配（可直向捲動）；橫向再兼顧高度。
-const DESKTOP_UI_WIDTH = 1100;
-const DESKTOP_UI_HEIGHT = 720;
-const PORTRAIT_UI_WIDTH = 760;
-let uiScaleLock = false;
-let uiScaleTimer = 0;
+// 手機不再整頁強制縮放（會把電腦理想字級壓小）；僅標記直立／橫向，字級由 CSS 調節。
+let uiFrameTimer = 0;
 
 function fitDesktopFrame() {
-  if (typeof window === "undefined" || typeof document === "undefined" || uiScaleLock) {
+  if (typeof window === "undefined" || typeof document === "undefined") {
     return;
   }
-  uiScaleLock = true;
   const root = document.documentElement;
-  const supportsZoom = "zoom" in root.style || typeof root.style.zoom === "string";
-  const prevZoom = root.style.zoom;
-  if (supportsZoom) {
-    root.style.zoom = "";
-  }
-  const vw = Math.max(320, Math.round(window.innerWidth || DESKTOP_UI_WIDTH));
-  const vh = Math.max(320, Math.round(window.innerHeight || DESKTOP_UI_HEIGHT));
-  const portrait = vh >= vw;
-  const designW = portrait ? PORTRAIT_UI_WIDTH : DESKTOP_UI_WIDTH;
-  const scale = portrait
-    ? Math.min(1, vw / designW)
-    : Math.min(1, vw / DESKTOP_UI_WIDTH, vh / DESKTOP_UI_HEIGHT);
-  root.style.setProperty("--desktop-ui-width", designW + "px");
-  root.style.setProperty("--desktop-ui-height", DESKTOP_UI_HEIGHT + "px");
-  root.style.setProperty("--ui-scale", String(scale));
-  root.classList.toggle("is-ui-scaled", scale < 0.999);
-  root.classList.toggle("is-ui-portrait", portrait);
-  if (supportsZoom) {
-    root.style.zoom = scale < 0.999 ? String(scale) : "";
-    root.classList.toggle("is-ui-zoom", scale < 0.999);
-  } else if (prevZoom) {
-    root.style.zoom = "";
-  }
-  uiScaleLock = false;
+  const vw = Math.max(1, Math.round(window.innerWidth || 1));
+  const vh = Math.max(1, Math.round(window.innerHeight || 1));
+  root.style.zoom = "";
+  root.classList.remove("is-ui-scaled", "is-ui-zoom");
+  root.style.removeProperty("--ui-scale");
+  root.classList.toggle("is-ui-portrait", vh >= vw);
+  root.classList.toggle("is-ui-landscape", vh < vw);
 }
 
 function scheduleDesktopFrame() {
-  window.clearTimeout(uiScaleTimer);
-  uiScaleTimer = window.setTimeout(fitDesktopFrame, 50);
+  window.clearTimeout(uiFrameTimer);
+  uiFrameTimer = window.setTimeout(fitDesktopFrame, 50);
 }
 
 function bootDesktopFrame() {

@@ -17,9 +17,6 @@
   --serif: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
   --spin: 3000ms;
   --ease: 180ms ease;
-  --desktop-ui-width: 1100px;
-  --desktop-ui-height: 720px;
-  --ui-scale: 1;
 }
 
 * {
@@ -29,49 +26,6 @@
 html {
   color-scheme: dark;
   overflow-x: clip;
-}
-
-/* 無 zoom 支援時：以設計寬為畫布，等比縮放置中 */
-html.is-ui-scaled:not(.is-ui-zoom) {
-  height: 100%;
-  overflow-x: hidden;
-}
-
-html.is-ui-scaled:not(.is-ui-zoom) body {
-  width: var(--desktop-ui-width);
-  min-height: max(100vh, calc(100vh / var(--ui-scale)));
-  margin-left: auto;
-  margin-right: auto;
-  transform: scale(var(--ui-scale));
-  transform-origin: top center;
-}
-
-html.is-ui-scaled:not(.is-ui-zoom) body.is-playing {
-  min-height: calc(100vh / var(--ui-scale));
-  height: calc(100vh / var(--ui-scale));
-}
-
-/* 直立：只依寬度縮放，高度可捲動，避免整頁被壓太小 */
-html.is-ui-portrait.is-ui-scaled:not(.is-ui-zoom) body.is-playing {
-  height: auto;
-  min-height: calc(100vh / var(--ui-scale));
-  overflow-y: auto;
-}
-
-html.is-ui-scaled:not(.is-ui-zoom) .play {
-  width: var(--desktop-ui-width);
-  left: 50%;
-  right: auto;
-  margin-left: calc(var(--desktop-ui-width) / -2);
-}
-
-html.is-ui-portrait .stage {
-  width: min(720px, calc(100% - 36px));
-}
-
-html.is-ui-portrait .soul-bar {
-  padding-left: max(16px, calc((100% - 760px) / 2));
-  padding-right: max(16px, calc((100% - 760px) / 2));
 }
 
 body {
@@ -111,16 +65,6 @@ body[data-aura="hidden"] {
 
 body.is-playing {
   overflow: hidden;
-}
-
-html.is-ui-portrait body.is-playing {
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-html.is-ui-portrait body.is-playing .play {
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 body.is-playing .margin-note,
@@ -1102,14 +1046,15 @@ body[data-aura="good"] .rebirth-panel {
 
 .hud-stats__row {
   display: grid;
-  grid-template-columns: 8.5em minmax(0, 1fr) 5.5em;
-  gap: 8px 12px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 8px 10px;
   align-items: center;
   min-height: 24px;
 }
 
 .hud-stats__lead {
   min-width: 0;
+  max-width: 4.8em;
 }
 
 .hud-stats__realm {
@@ -1138,8 +1083,8 @@ body[data-aura="good"] .rebirth-panel {
   --neon-core: #e8f4ff;
   --neon-dim: #3d5570;
   display: grid;
-  grid-template-columns: 2.6em minmax(0, 1fr) 2em;
-  column-gap: 10px;
+  grid-template-columns: 1.2em minmax(0, 1fr) 2em;
+  column-gap: 6px;
   align-items: center;
   flex: 1 1 0;
   width: auto;
@@ -2576,10 +2521,128 @@ body[data-aura="good"] .rebirth-panel {
   outline-offset: 3px;
 }
 
-/* 窄螢幕改由 --ui-scale／zoom 等比縮小桌面版面，不再改寫欄位結構以免比例走樣 */
-@media (max-width: 1100px) {
+/* 手機／平板：維持電腦版結構，但字級加大，避免內容過小 */
+@media (max-width: 900px) {
   .margin-note {
     display: none;
+  }
+
+  .stage {
+    width: min(720px, calc(100% - 28px));
+    padding-top: 36px;
+    padding-bottom: 96px;
+  }
+
+  .screen__index {
+    font-size: 13px;
+    letter-spacing: 0.28em;
+  }
+
+  h1 {
+    font-size: clamp(30px, 7vw, 40px);
+  }
+
+  .brand-hero {
+    font-size: clamp(40px, 10vw, 64px);
+  }
+
+  .lead,
+  .lead--gate,
+  .lead--quiz,
+  .rebirth-detail,
+  .footnote,
+  .reading__body {
+    font-size: 17px;
+    line-height: 1.85;
+  }
+
+  .lead--quiz {
+    font-size: 18px;
+  }
+
+  .choice {
+    padding: 18px 16px;
+  }
+
+  .choice__text {
+    font-size: 16.5px;
+    line-height: 1.7;
+  }
+
+  .btn {
+    min-height: 50px;
+    font-size: 16px;
+  }
+
+  .log-line__text,
+  .log-line--prompt .log-line__text {
+    font-size: clamp(17px, 4.4vw, 20px);
+  }
+
+  .choice-card__label {
+    font-size: 16.5px;
+    line-height: 1.7;
+  }
+
+  .choice-card__index {
+    font-size: 14px;
+  }
+
+  .hud-stats__row {
+    gap: 6px 8px;
+  }
+
+  .hud-stats__lead {
+    max-width: 3.6em;
+  }
+
+  .soul-bar {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .dashboard__title {
+    font-size: 13px;
+    letter-spacing: 0.12em;
+  }
+}
+
+@media (max-width: 640px) {
+  .prelude {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .prelude li:not(:last-child)::after {
+    display: none;
+  }
+
+  .stat-board {
+    grid-template-columns: 1fr;
+  }
+
+  .wheel-layout {
+    flex-direction: column;
+  }
+
+  .wheel-stage {
+    width: min(340px, calc(100% - 20px));
+    margin-inline: auto;
+  }
+
+  .lead--quiz {
+    font-size: 18.5px;
+  }
+
+  .choice__text {
+    font-size: 17px;
+  }
+
+  .log-line--prompt .log-line__text {
+    font-size: 18px;
+  }
+
+  .choice-card__label {
+    font-size: 17px;
   }
 }
 
